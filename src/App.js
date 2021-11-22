@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import SearchForm from './componets/SearchForm';
 import SearchResults from './componets/SearchResults';
+import SearchHeader from './SearchHeader';
 // import './index.css'
 
 // const images = [
@@ -47,44 +48,53 @@ function App() {
     api: 'https://api.giphy.com/v1/gifs',
     endpoint: '/search'
   };
-  
+
   const [images, setImages] = useState([]);
-  
+  const [searchString, setSearchString] = useState('minions');
+  const [lastSearch, setLastSearch] = useState('')
+
   useEffect(() => {
-    getImages();
+    // getImages();
+    getImages(searchString);
   }, []);
 
-  
-  function getImages () {
-    // const searchOptions = {
-      //   key: process.env.REACT_APP_GIPHY_KEY,
-      //   limit: 25,
-      //   rating: 'G',
-      //   api: 'https://api.giphy.com/v1/gifs/search?api_key=KynusDCYH27D0KoUwDdDIhUz45b7LD5D&q=&limit=25&offset=0&rating=g&lang=en',
-      //   endpoint: '/search'
-      // };
-      
-      const searchString = 'minions';
-      
-      /* Build a URL from the searchOptions object */
-      
-      const url = `${searchOptions.api}${searchOptions.endpoint}?api_key=${searchOptions.key}&q=${searchString} &limit=${searchOptions.limit}&offset=${searchOptions.offset}&rating=${searchOptions.rating}&lang=en`;
-      
-      fetch(url)
+  function getImages(searchString) {
+    // const searchString = 'minions';
+    /* Build a URL from the searchOptions object */
+    // const url = `${searchOptions.api}${searchOptions.endpoint}?api_key=${searchOptions.key}&q=${searchString} &limit=${searchOptions.limit}&offset=${searchOptions.offset}&rating=${searchOptions.rating}&lang=en`;
+    const url = `${searchOptions.api}${searchOptions.endpoint}?api_key=${searchOptions.key}&q=${searchString}&limit=${searchOptions.limit}&offset=${searchOptions.offset}&rating=${searchOptions.rating}&lang=en`;
+
+    fetch(url)
       .then(response => response.json())
       .then(response => {
         setImages(response.data);
+        setLastSearch(searchString);
+        setSearchString('')
       })
       .catch(console.error);
-      
-    }
-    return (
-      <div>
-        <h1>Giphy Searcher</h1>
-        <SearchForm />
-        <SearchResults images={images} />
-      </div>
-    );
-}
+  }
 
+  function handleChange(event) {
+    setSearchString(event.target.value);
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    getImages(searchString);
+  }
+
+  return (
+    <div>
+      {/* <h1>Giphy Searcher</h1> */}
+      {/* <SearchForm /> */}
+      <SearchHeader lastSearch={lastSearch} />
+      <SearchForm
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        searchString={searchString}
+      />
+      <SearchResults images={images} />
+    </div>
+  );
+}
 export default App;
